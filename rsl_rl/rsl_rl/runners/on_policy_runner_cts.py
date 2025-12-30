@@ -45,6 +45,8 @@ import numpy as np
 from pathlib import Path
 from legged_gym.utils.helpers import class_to_dict
 from typing import Union
+from robogauge.scripts.client import RoboGaugeClient
+from legged_gym.utils.exporter import export_policy_as_jit
 
 def numpy_representer(dumper, data):
     return dumper.represent_float(float(data))
@@ -108,6 +110,9 @@ class OnPolicyRunnerCTS:
             Path(self.log_dir).mkdir(parents=True, exist_ok=True)
             all_cfg = {"train_cfg": train_cfg, "env_cfg": class_to_dict(self.env.cfg)}
             yaml.safe_dump(all_cfg, open(os.path.join(self.log_dir, 'config.yaml'), 'w'))
+        
+        # robogauge client
+        self.robogauge_client = RoboGaugeClient()
     
     def learn(self, num_learning_iterations, init_at_random_ep_len=False):
         # initialize writer
@@ -180,7 +185,7 @@ class OnPolicyRunnerCTS:
             if self.log_dir is not None:
                 self.log(locals())
             if it % self.save_interval == 0:
-                self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
+                self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)), it)
             ep_infos.clear()
         
         self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)))
@@ -261,7 +266,7 @@ class OnPolicyRunnerCTS:
                                locs['tot_iter'] - locs['it']):.1f}s\n""")
         print(log_string)
 
-    def save(self, path, infos=None):
+    def save(self, path, it, infos=None):
         torch.save({
             'model_state_dict': self.alg.model.state_dict(),
             'optimizer1_state_dict': self.alg.optimizer1.state_dict(),
@@ -269,6 +274,32 @@ class OnPolicyRunnerCTS:
             'iter': self.current_learning_iteration,
             'infos': infos,
             }, path)
+        self.update_robogauge(path, it)
+    
+    def update_robogauge(self, model_path, it):
+        if it % 500 == 0:
+            # export jit model
+            jit_dir = os.path.join(self.log_dir, 'jit_models')
+            jit_path = os.path.join(jit_dir, f'policy_jit_{it}.pt')
+            export_policy_as_jit(self.alg.model, jit_dir, filename=f'policy_jit_{it}.pt')
+            # upload to robogauge
+            self.robogauge_client.submit_task(
+                model_path=jit_path,
+                step=it,
+                task_name='go2_moe' if 'moe' in self.cfg["algorithm_class_name"].lower() else 'go2',
+                experiment_name=self.cfg["experiment_name"]
+            )
+        self.robogauge_client.monitor_tasks()
+        results_dir = os.path.join(self.log_dir, 'robogauge_results')
+        os.makedirs(results_dir, exist_ok=True)
+        for task_id, resp in self.robogauge_client.response_data.items():
+            scores = resp['results']['scores']
+            step = resp['step']
+            for key, val in scores.items():
+                self.writer.add_scalar(f'RoboGauge/{key}', val, step)
+            results_path = os.path.join(results_dir, f'results_{step}.yaml')
+            with open(results_path, 'w', encoding='utf-8') as f:
+                yaml.dump(resp['results'], f, allow_unicode=True, sort_keys=False)
 
     def load(self, path, load_optimizer=True):
         loaded_dict = torch.load(path)

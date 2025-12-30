@@ -244,7 +244,7 @@ class GO2CfgCTS(LeggedRobotCfgCTS):
         num_steps_per_env = 24
         run_name = ''
         experiment_name = 'go2_cts'
-        max_iterations = 100000
+        max_iterations = 150000
         save_interval = 500
     
     class policy(LeggedRobotCfgCTS.policy):
@@ -262,5 +262,5 @@ class GO2CfgMoECTS(LeggedRobotCfgMoECTS):
     class runner(LeggedRobotCfgMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_moe_cts'
-        max_iterations = 100000
+        max_iterations = 150000
         save_interval = 500

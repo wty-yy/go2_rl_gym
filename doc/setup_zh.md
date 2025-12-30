@@ -88,6 +88,12 @@ python 1080_balls_of_solitude.py
 
 `rsl_rl` 是一个强化学习算法库。
 
+我们仓库中是带有新算法的 `rsl_rl`，克隆 Git 仓库：
+
+```bash
+git clone https://github.com/wty-yy/go2_rl_gym.git
+```
+
 #### 2.3.1 安装
 
 ```bash
@@ -96,16 +102,6 @@ pip install -e .
 ```
 
 ### 2.4 安装 go2_rl_gym
-
-#### 2.4.1 下载
-
-通过 Git 克隆仓库：
-
-```bash
-git clone https://github.com/wty-yy/go2_rl_gym.git
-```
-
-#### 2.4.2 安装
 
 进入目录并安装：
 
