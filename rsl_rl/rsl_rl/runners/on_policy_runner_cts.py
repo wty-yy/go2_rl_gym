@@ -36,8 +36,8 @@ import statistics
 from torch.utils.tensorboard import SummaryWriter
 import torch
 
-from rsl_rl.algorithms import CTS, MoECTS
-from rsl_rl.modules import ActorCriticCTS, ActorCriticMoECTS
+from rsl_rl.algorithms import CTS, MoECTS, MCPCTS
+from rsl_rl.modules import ActorCriticCTS, ActorCriticMoECTS, ActorCriticMCPCTS
 from rsl_rl.env import VecEnv
 
 import yaml
@@ -80,7 +80,7 @@ class OnPolicyRunnerCTS:
             num_critic_obs = self.env.num_obs
         history_length = train_cfg["history_length"]
         actor_critic_class = eval(self.cfg["policy_class_name"])
-        model: Union[ActorCriticCTS, ActorCriticMoECTS] = actor_critic_class(
+        model: Union[ActorCriticCTS, ActorCriticMoECTS, ActorCriticMCPCTS] = actor_critic_class(
             self.env.num_obs,
             num_critic_obs,
             self.env.num_actions,
@@ -88,7 +88,7 @@ class OnPolicyRunnerCTS:
             history_length,
             **self.policy_cfg).to(self.device)
         alg_class = eval(self.cfg["algorithm_class_name"])
-        self.alg: Union[CTS, MoECTS] = alg_class(model, self.env.num_envs, history_length, device=self.device, **self.alg_cfg)
+        self.alg: Union[CTS, MoECTS, MCPCTS] = alg_class(model, self.env.num_envs, history_length, device=self.device, **self.alg_cfg)
         self.num_steps_per_env = self.cfg["num_steps_per_env"]
         self.save_interval = self.cfg["save_interval"]
 
@@ -175,7 +175,7 @@ class OnPolicyRunnerCTS:
                 start = stop
                 self.alg.compute_returns(privileged_obs, self.history.flatten(1))
             
-            if self.cfg["algorithm_class_name"] == "CTS":
+            if self.cfg["algorithm_class_name"] in ["CTS", "MCPCTS"]:
                 mean_value_loss, mean_surrogate_loss, mean_entropy_loss, mean_latent_loss = self.alg.update()
             elif self.cfg["algorithm_class_name"] == "MoECTS":
                 mean_value_loss, mean_surrogate_loss, mean_entropy_loss, mean_latent_loss, mean_load_balance_loss = self.alg.update()
@@ -212,7 +212,8 @@ class OnPolicyRunnerCTS:
                 else:
                     self.writer.add_scalar('Episode/' + key, value, locs['it'])
                 ep_string += f"""{f'Mean episode {key}:':>{pad}} {value:.4f}\n"""
-        mean_std = self.alg.model.std.mean()
+        if 'mcp' not in self.cfg["algorithm_class_name"].lower():
+            mean_std = self.alg.model.std.mean()
         fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
 
         self.writer.add_scalar('Loss/value_function', locs['mean_value_loss'], locs['it'])
@@ -222,7 +223,8 @@ class OnPolicyRunnerCTS:
         if 'mean_load_balance_loss' in locs:
             self.writer.add_scalar('Loss/load_balance', locs['mean_load_balance_loss'], locs['it'])
         self.writer.add_scalar('Loss/learning_rate', self.alg.learning_rate, locs['it'])
-        self.writer.add_scalar('Policy/mean_noise_std', mean_std.item(), locs['it'])
+        if 'mcp' not in self.cfg["algorithm_class_name"].lower():
+            self.writer.add_scalar('Policy/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
@@ -249,7 +251,8 @@ class OnPolicyRunnerCTS:
                       f"""{'Latent loss:':>{pad}} {locs['mean_latent_loss']:.4f}\n""")
         if 'mean_load_balance_loss' in locs:
             log_string += f"""{'Load balance loss:':>{pad}} {locs['mean_load_balance_loss']:.4f}\n"""
-        log_string += f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
+        if 'mcp' not in self.cfg["algorithm_class_name"].lower():
+            log_string += f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
         if len(locs['teacher_rewbuffer']):
             log_string += (f"""{'Mean teacher reward:':>{pad}} {statistics.mean(locs['teacher_rewbuffer']):.2f}\n"""
                            f"""{'Mean teacher episode length:':>{pad}} {statistics.mean(locs['teacher_lenbuffer']):.2f}\n""")
@@ -274,19 +277,22 @@ class OnPolicyRunnerCTS:
             'iter': self.current_learning_iteration,
             'infos': infos,
             }, path)
-        self.update_robogauge(path, it)
+        self.update_robogauge(it)
     
-    def update_robogauge(self, model_path, it):
+    def update_robogauge(self, it):
         if it % 500 == 0:
             # export jit model
             jit_dir = os.path.join(self.log_dir, 'jit_models')
             jit_path = os.path.join(jit_dir, f'policy_jit_{it}.pt')
             export_policy_as_jit(self.alg.model, jit_dir, filename=f'policy_jit_{it}.pt')
             # upload to robogauge
+            task_name = 'go2'
+            if 'moe' in self.cfg["algorithm_class_name"].lower() or 'mcp' in self.cfg["algorithm_class_name"].lower():
+                task_name = 'go2_moe'
             self.robogauge_client.submit_task(
                 model_path=jit_path,
                 step=it,
-                task_name='go2_moe' if 'moe' in self.cfg["algorithm_class_name"].lower() else 'go2',
+                task_name=task_name,
                 experiment_name=self.cfg["experiment_name"]
             )
         self.robogauge_client.monitor_tasks()

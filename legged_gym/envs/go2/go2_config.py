@@ -1,5 +1,5 @@
 import math
-from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobotCfgPPO, LeggedRobotCfgCTS, LeggedRobotCfgMoECTS, LeggedRobotCfgMoECTS
+from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobotCfgPPO, LeggedRobotCfgCTS, LeggedRobotCfgMoECTS, LeggedRobotCfgMoECTS, LeggedRobotCfgMCPCTS
 
 class GO2Cfg(LeggedRobotCfg):
     class init_state(LeggedRobotCfg.init_state):
@@ -262,5 +262,16 @@ class GO2CfgMoECTS(LeggedRobotCfgMoECTS):
     class runner(LeggedRobotCfgMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_moe_cts'
+        max_iterations = 150000
+        save_interval = 500
+
+class GO2CfgMCPCTS(LeggedRobotCfgMCPCTS):
+    class policy(LeggedRobotCfgMCPCTS.policy):
+        obs_no_goal_mask = [True] * 6 + [False] * 3 + [True] * 36  # mask for obs without command info
+        student_expert_num = 8 # number of experts in the student model
+
+    class runner(LeggedRobotCfgMCPCTS.runner):
+        run_name = ''
+        experiment_name = 'go2_mcp_cts'
         max_iterations = 150000
         save_interval = 500

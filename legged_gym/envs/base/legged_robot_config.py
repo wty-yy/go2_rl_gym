@@ -359,3 +359,12 @@ class LeggedRobotCfgMoECTS(LeggedRobotCfgCTS):
     class runner(LeggedRobotCfgCTS.runner):
         policy_class_name = 'ActorCriticMoECTS'
         algorithm_class_name = 'MoECTS'
+
+class LeggedRobotCfgMCPCTS(LeggedRobotCfgCTS):
+    class policy(LeggedRobotCfgCTS.policy):
+        obs_no_goal_mask = None # mask for observation without goal inputs
+        student_expert_num = 8 # number of experts in the student model
+
+    class runner(LeggedRobotCfgCTS.runner):
+        policy_class_name = 'ActorCriticMCPCTS'
+        algorithm_class_name = 'MCPCTS'

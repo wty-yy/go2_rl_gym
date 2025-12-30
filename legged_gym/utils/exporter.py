@@ -81,7 +81,11 @@ class _TorchPolicyExporter(torch.nn.Module):
             self.history_length = policy.history.shape[1]
             self.history = torch.zeros([1, policy.history.shape[1], policy.history.shape[2]], device='cpu')
             self.forward = self.forward_moe_cts
-        if hasattr(policy, "actor"):
+        if hasattr(policy, "actor_mcp"):
+            self.actor = copy.deepcopy(policy.actor_mcp)
+            self.obs_no_goal_mask = copy.deepcopy(policy.obs_no_goal_mask).cpu()
+            self.forward = self.forward_mcp_cts
+        elif hasattr(policy, "actor"):
             self.actor = copy.deepcopy(policy.actor)
             if self.is_recurrent:
                 self.rnn = copy.deepcopy(policy.memory_a.rnn)
@@ -129,6 +133,16 @@ class _TorchPolicyExporter(torch.nn.Module):
         latent, weights = self.student_moe_encoder(self.history.flatten(1), history_no_goal)
         x = torch.cat([latent, x], dim=1)
         return self.actor(x), (weights, latent)
+    
+    def forward_mcp_cts(self, x):  # x is single observations
+        x = self.normalizer(x)
+        self.history = torch.cat([self.history[:, 1:], x.unsqueeze(1)], dim=1)
+        x_no_goal = x[:, self.obs_no_goal_mask]
+        latent = self.student_encoder(self.history.flatten(1))
+        x = torch.cat([latent, x], dim=1)
+        x_no_goal = torch.cat([latent, x_no_goal], dim=1)
+        mean_action, _, weights = self.actor(x, x_no_goal)
+        return mean_action, weights
 
     @torch.jit.export
     def reset(self):
@@ -176,6 +190,11 @@ class _OnnxPolicyExporter(torch.nn.Module):
                 self.rnn = copy.deepcopy(policy.memory_a.rnn)
             if self.input_dim is None:
                  self.input_dim = self.actor[0].in_features
+        elif hasattr(policy, "actor_mcp"):
+            self.actor = copy.deepcopy(policy.actor_mcp)
+            self.obs_no_goal_mask = copy.deepcopy(policy.obs_no_goal_mask).cpu()
+            self.history_length = policy.history.shape[1]
+            self.forward = self.forward_mcp_cts 
         else:
             raise ValueError("Policy does not have an actor/student module.")
 
@@ -245,6 +264,33 @@ class _OnnxPolicyExporter(torch.nn.Module):
         x = torch.cat([latent, last_obs], dim=1)
 
         return self.actor(x), weights, latent
+    
+    def forward_mcp_cts(self, x):
+        x = self.normalizer(x)
+        term_dims = [3, 3, 3, self.num_actions, self.num_actions, self.num_actions]
+        obs_dim = sum(term_dims)
+        frames = x.shape[1] // obs_dim
+        
+        split_sizes = [dim * frames for dim in term_dims]
+        term_chunks = torch.split(x, split_sizes, dim=1)
+        frame_terms_reshaped = [chunk.view(-1, frames, dim) for chunk, dim in zip(term_chunks, term_dims)]
+        history_by_frame = []
+        for i in range(frames):
+            terms_for_this_frame = [ftr[:, i, :] for ftr in frame_terms_reshaped]
+            history_by_frame.append(torch.cat(terms_for_this_frame, dim=1))
+        history = torch.cat(history_by_frame, dim=1)
+
+        last_obs = history[:, -obs_dim:]
+        
+        obs_no_goal = last_obs[:, self.obs_no_goal_mask]
+        
+        latent = self.student_encoder(history)
+        
+        x_in = torch.cat([latent, last_obs], dim=1)
+        x_no_goal_in = torch.cat([latent, obs_no_goal], dim=1)
+        
+        mean_action, _, weights = self.actor(x_in, x_no_goal_in)
+        return mean_action, weights
 
     def export(self, path, filename):
         self.to("cpu")
@@ -254,6 +300,8 @@ class _OnnxPolicyExporter(torch.nn.Module):
         if self.forward == self.forward_moe_cts:
             output_names.append("weights")
             output_names.append("latent")
+        if self.forward == self.forward_mcp_cts:
+            output_names.append("weights")
 
         torch.onnx.export(
             self,
