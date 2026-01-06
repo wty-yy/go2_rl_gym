@@ -200,23 +200,16 @@ class StudentMoEEncoder(nn.Module):
         activation = get_activation(activation)
 
         # Expert networks
-        experts_layers = []
-        last_dim = expert_dim
-        for l in hidden_dims:
-            experts_layers.append(nn.Linear(last_dim, l))
-            experts_layers.append(activation)
-            last_dim = l
-        self.experts_backbone = nn.Sequential(*experts_layers)
-        self.experts_hidden = nn.Sequential(
-            nn.Linear(last_dim, expert_num * expert_hidden_dim),
-            activation
-        )
-        self.experts_out = nn.Conv1d(
-             in_channels=expert_num*expert_hidden_dim,
-             out_channels=expert_num*latent_dim,
-             kernel_size=1,
-             groups=expert_num
-        )
+        self.experts = nn.ModuleList()
+        for _ in range(expert_num):
+            experts_layers = []
+            last_dim = gating_dim
+            for l in hidden_dims:
+                experts_layers.append(nn.Linear(last_dim, l))
+                experts_layers.append(activation)
+                last_dim = l
+            experts_layers.append(nn.Linear(last_dim, latent_dim))
+            self.experts.append(nn.Sequential(*experts_layers))
 
         # Gating network
         gating_layers = []
@@ -228,14 +221,15 @@ class StudentMoEEncoder(nn.Module):
         gating_layers.append(nn.Linear(last_dim, expert_num))
         gating_layers.append(nn.Softmax(dim=-1))
         self.gating_network = nn.Sequential(*gating_layers)
-    
+
     def forward(self, obs, obs_no_goal):
         weights = self.gating_network(obs)  # (batch, expert_num)
-        shared_features = self.experts_backbone(obs_no_goal)
-        expert_hidden = self.experts_hidden(shared_features)
-        expert_hidden = expert_hidden.unsqueeze(-1)
-        expert_latent_flat = self.experts_out(expert_hidden)  # (batch, expert_num * latent_dim, 1)
-        expert_latent = expert_latent_flat.reshape(-1, self.expert_num, self.latent_dim)
+        
+        expert_outs = []
+        for expert in self.experts:
+            expert_outs.append(expert(obs))
+        expert_latent = torch.stack(expert_outs, dim=1)  # (batch, expert_num, latent_dim)
+
         latent = torch.sum(weights.unsqueeze(-1) * expert_latent, dim=1)  # (batch, latent_dim)
         latent = self.norm_layer(latent)
         return latent, weights
