@@ -15,7 +15,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions import Normal
-from rsl_rl.modules.utils import MLP, MoE, Experts, L2Norm, SimNorm
+from rsl_rl.modules.utils import MLP, MoE, StudentMoEEncoder, Experts, L2Norm, SimNorm
 
 class ActorCriticDualMoECTS(nn.Module):
     is_recurrent = False
@@ -56,12 +56,13 @@ class ActorCriticDualMoECTS(nn.Module):
         )
 
         # Student encoder
-        self.student_moe_encoder = MoE(
+        self.student_moe_encoder = StudentMoEEncoder(
             expert_num=expert_num,
             input_dim=mlp_input_dim_s,
             hidden_dims=student_encoder_hidden_dims,
             output_dim=latent_dim,
             activation=activation,
+            norm_type=norm_type,
         )
 
         # MCP Actor
