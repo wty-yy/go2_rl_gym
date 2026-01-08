@@ -16,7 +16,7 @@ from legged_gym import LEGGED_GYM_ROOT_DIR
 from legged_gym.envs.base.base_task import BaseTask
 from legged_gym.utils.math import wrap_to_pi, quat_apply_yaw
 from legged_gym.utils.isaacgym_utils import get_euler_xyz as get_euler_xyz_in_tensor
-from legged_gym.utils.isaacgym_utils import sample_disjoint_intervals
+from legged_gym.utils.isaacgym_utils import sample_disjoint_intervals, sample_single_interval
 from legged_gym.utils.helpers import class_to_dict
 from .legged_robot_config import LeggedRobotCfg
 from legged_gym.utils.terrain import Terrain
@@ -474,18 +474,35 @@ class LeggedRobot(BaseTask):
                 self.commands[env_ids, 2] = (upper - lower) * r + lower
             self.commands_resampling_step[env_ids] = self.cfg.commands.resampling_time / self.dt
         else:
-            self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0], self.command_ranges["lin_vel_x"][1], (len(env_ids), 1), device=self.device).squeeze(1)
-            self.commands[env_ids, 1] = torch_rand_float(self.command_ranges["lin_vel_y"][0], self.command_ranges["lin_vel_y"][1], (len(env_ids), 1), device=self.device).squeeze(1)
+            self.commands[env_ids, 0] = sample_single_interval(
+                env_ids,
+                self.env_command_ranges["lin_vel_x"][env_ids, 0],
+                self.env_command_ranges["lin_vel_x"][env_ids, 1],
+                self.device
+            )
+            self.commands[env_ids, 1] = sample_single_interval(
+                env_ids,
+                self.env_command_ranges["lin_vel_y"][env_ids, 0],
+                self.env_command_ranges["lin_vel_y"][env_ids, 1],
+                self.device
+            )
             if self.cfg.commands.heading_command:
-                self.commands[env_ids, 3] = torch_rand_float(self.command_ranges["heading"][0], self.command_ranges["heading"][1], (len(env_ids), 1), device=self.device).squeeze(1)
+                self.commands[env_ids, 3] = sample_single_interval(
+                    env_ids,
+                    self.env_command_ranges["heading"][env_ids, 0],
+                    self.env_command_ranges["heading"][env_ids, 1],
+                    self.device
+                )
             else:
-                self.commands[env_ids, 2] = torch_rand_float(self.command_ranges["ang_vel_yaw"][0], self.command_ranges["ang_vel_yaw"][1], (len(env_ids), 1), device=self.device).squeeze(1)
+                self.commands[env_ids, 2] = sample_single_interval(
+                    env_ids,
+                    self.env_command_ranges["ang_vel_yaw"][env_ids, 0],
+                    self.env_command_ranges["ang_vel_yaw"][env_ids, 1],
+                    self.device
+                )
 
             # set small commands to zero
             self.commands[env_ids, :2] *= (torch.norm(self.commands[env_ids, :2], dim=1) > 0.2).unsqueeze(1)
-
-        # set small commands to zero
-        # self.commands[env_ids, :2] *= (torch.norm(self.commands[env_ids, :2], dim=1) > 0.2).unsqueeze(1)
 
         rand_prob = torch.rand(len(env_ids), device=self.device)
         min_prob, max_prob = 0.0, 0.0
@@ -1129,7 +1146,7 @@ class LeggedRobot(BaseTask):
         distance = self.max_move_distance[env_ids]
         # robots that walked far enough progress to harder terains
         move_up = distance > self.terrain.env_length / 2
-        if self.cfg.terrain.move_down_by_acuumulated_xy_command:
+        if self.cfg.terrain.move_down_by_accumulated_xy_command:
             move_down = (distance < torch.norm(self.commands_xy_accumulation[env_ids], dim=1) * (self.cfg.commands.resampling_time * (1 - self.zero_command_proba)) * 0.5) * ~move_up
         else:
             # robots that walked less than half of their required distance go to simpler terrains

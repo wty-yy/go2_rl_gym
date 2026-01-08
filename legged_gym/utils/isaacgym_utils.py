@@ -45,3 +45,11 @@ def sample_disjoint_intervals(env_ids, limit_bound, cfg_min, cfg_max, device):
         cfg_max - width_pos + (u - width_neg)
     )
     return samples
+
+def sample_single_interval(env_ids, cfg_min, cfg_max, device):
+    """
+    sample uniform distribution from [cfg_min, cfg_max]
+    """
+    r = torch.rand(len(env_ids), device=device)
+    samples = cfg_min + r * (cfg_max - cfg_min)
+    return samples
