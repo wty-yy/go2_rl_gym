@@ -443,6 +443,7 @@ class LeggedRobot(BaseTask):
                     self._update_env_command_ranges()
                     print(f"Command range updated at iter {current_iter}: {self.command_ranges}")
         remaining_dist = torch.clip(0.625 * self.cfg.terrain.terrain_length - torch.norm(self.commands_xy_accumulation[env_ids], dim=1) * self.cfg.commands.resampling_time, 0.0)
+        self.commands_resampling_step[env_ids] = self.cfg.commands.resampling_time / self.dt
         if self.cfg.commands.dynamic_resample_commands:
             # arrive at boundary 0.625 times the width of the remaining distance
             if ((self.max_episode_length - self.episode_length_buf[env_ids]) == 0).any():
@@ -472,7 +473,6 @@ class LeggedRobot(BaseTask):
                 lower = self.env_command_ranges["ang_vel_yaw"][env_ids, 0]
                 upper = self.env_command_ranges["ang_vel_yaw"][env_ids, 1]
                 self.commands[env_ids, 2] = (upper - lower) * r + lower
-            self.commands_resampling_step[env_ids] = self.cfg.commands.resampling_time / self.dt
         else:
             self.commands[env_ids, 0] = sample_single_interval(
                 env_ids,
