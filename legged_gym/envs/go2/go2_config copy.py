@@ -1,4 +1,3 @@
-# Don't forget to change IS_HARD = False, if you want to use original training setting
 import math
 from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobotCfgPPO, LeggedRobotCfgCTS, LeggedRobotCfgMoECTS, LeggedRobotCfgMoECTS, LeggedRobotCfgMCPCTS, LeggedRobotCfgACMoECTS, LeggedRobotCfgDualMoECTS, LeggedRobotCfgREMCTS
 
@@ -37,7 +36,7 @@ class GO2Cfg(LeggedRobotCfg):
         num_privileged_obs = 45 + 3 + 4 + 12 + 12 + 187  # 263
         # num_privileged_obs = 45 + 3 + 187  # 235
         # num_privileged_obs = 48  # without height measurements
-        episode_length_s = 20
+        episode_length_s = 25
 
     class domain_rand(LeggedRobotCfg.domain_rand):
         ### Robot properties ###
@@ -94,37 +93,35 @@ class GO2Cfg(LeggedRobotCfg):
         # terrain_proportions = [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
         # terrain_proportions = [0.3, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1]
         # terrain_proportions = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-        move_down_by_accumulated_xy_command = False # move down the terrain curriculum based on accumulated xy command distance instead of absolute distance
+        move_down_by_accumulated_xy_command = True # move down the terrain curriculum based on accumulated xy command distance instead of absolute distance
         
     class commands(LeggedRobotCfg.commands):
         curriculum = False
         max_curriculum = 1.
         num_commands = 4 # default: lin_vel_x, lin_vel_y, ang_vel_yaw (in heading mode ang_vel_yaw is recomputed from heading error)
-        resampling_time = 10. # time before command are changed[s]
-        heading_command = True # if true: compute ang vel command from heading error
+        resampling_time = 5. # time before command are changed[s]
+        heading_command = False # if true: compute ang vel command from heading error
         # start training with zero commands and then gradually increase zero command probability
-        zero_command_curriculum = None
-        # zero_command_curriculum = {'start_iter': 0, 'end_iter': 1500, 'start_value': 0.0, 'end_value': 0.1}
-        limit_ang_vel_at_zero_command_prob = 0.0 # probability of add limiting angular velocity commands when zero command is sampled
-        limit_vel_prob = 0.0 # probability of limiting linear velocity command
+        zero_command_curriculum = {'start_iter': 0, 'end_iter': 1500, 'start_value': 0.0, 'end_value': 0.1}
+        limit_ang_vel_at_zero_command_prob = 0.2 # probability of add limiting angular velocity commands when zero command is sampled
+        limit_vel_prob = 0.2 # probability of limiting linear velocity command
         limit_vel_invert_when_continuous = True # invert the limit logic when using continuous sample limit velocity commands
         limit_vel = {"lin_vel_x": [-1, 1], "lin_vel_y": [-1, 1], "ang_vel_yaw": [-1, 0, 1]} # sample vel commands from min [-1] or zero [0] or max [1] range only
         stop_heading_at_limit = True # stop heading updates when vel is limited
-        dynamic_resample_commands = False # sample commands with low bounds
-        command_range_curriculum = []
-        # command_range_curriculum = [{ # list for command range curriculums at specific training iterations
-        #     'iter': 20000, # training iteration at which the command ranges are updated
-        #     'lin_vel_x': [-1.0, 1.0], # min max [m/s]
-        #     'lin_vel_y': [-1.0, 1.0], # min max [m/s]
-        #     'ang_vel_yaw': [-1.5, 1.5], # min max [rad/s]
-        #     'heading': [-1.57, 1.57], # min max [rad]
-        # }, { # list for command range curriculums at specific training iterations
-        #     'iter': 50000, # training iteration at which the command ranges are updated
-        #     'lin_vel_x': [-2.0, 2.0], # min max [m/s]
-        #     'lin_vel_y': [-1.0, 1.0], # min max [m/s]
-        #     'ang_vel_yaw': [-2.0, 2.0], # min max [rad/s]
-        #     'heading': [-1.57, 1.57], # min max [rad]
-        # }]
+        dynamic_resample_commands = True # sample commands with low bounds
+        command_range_curriculum = [{ # list for command range curriculums at specific training iterations
+            'iter': 20000, # training iteration at which the command ranges are updated
+            'lin_vel_x': [-1.0, 1.0], # min max [m/s]
+            'lin_vel_y': [-1.0, 1.0], # min max [m/s]
+            'ang_vel_yaw': [-1.5, 1.5], # min max [rad/s]
+            'heading': [-1.57, 1.57], # min max [rad]
+        }, { # list for command range curriculums at specific training iterations
+            'iter': 50000, # training iteration at which the command ranges are updated
+            'lin_vel_x': [-2.0, 2.0], # min max [m/s]
+            'lin_vel_y': [-1.0, 1.0], # min max [m/s]
+            'ang_vel_yaw': [-2.0, 2.0], # min max [rad/s]
+            'heading': [-1.57, 1.57], # min max [rad]
+        }]
         turn_over_zero_time = { # if turn_over is true, time robot must be stable before sampling new commands after a turn over
             "backflip": 5.0,
             "sideflip": 3.0,
@@ -143,9 +140,9 @@ class GO2Cfg(LeggedRobotCfg):
         ]
 
         class ranges:
-            lin_vel_x = [-2.0, 2.0] # min max [m/s]
-            lin_vel_y = [-1.0, 1.0] # min max [m/s]
-            ang_vel_yaw = [-2.0, 2.0]   # min max [rad/s]
+            lin_vel_x = [-0.5, 0.5] # min max [m/s]
+            lin_vel_y = [-0.5, 0.5] # min max [m/s]
+            ang_vel_yaw = [-1.0, 1.0]   # min max [rad/s]
             heading = [-1.57, 1.57] # min max [rad]
         
     class asset(LeggedRobotCfg.asset):
@@ -168,16 +165,15 @@ class GO2Cfg(LeggedRobotCfg):
             # {'reward_name': 'upright', 'start_iter': 0, 'end_iter': 1500, 'start_value': 1.0, 'end_value': 0.0},
         ]
         tracking_sigma = 0.25 # tracking reward = exp(-error^2/sigma)
-        dynamic_sigma = None
-        # dynamic_sigma = { # linear interpolation of sigma based on command velocity, **Must start terrain curriculum first**
-        #     "min_lin_vel": 0.5, # min abs linear velocity to have default sigma
-        #     "max_lin_vel": 1.5, # max abs linear velocity to have max sigma
-        #     "min_ang_vel": 1.0, # min abs angular velocity to have default sigma
-        #     "max_ang_vel": 2.0, # max abs angular velocity to have max sigma
-        #     # wave, slope, rough_slope, stairs up, stairs down, obstacles, stepping_stones, gap, flat]
-        #     # "max_sigma": [1/3, 1/4, 1/4, 1/2.7, 1/2.7, 1/2, 1, 1, 1/4]
-        #     "max_sigma": [5/12, 1/4, 1/4, 1/2, 1/2, 3/4, 1, 1, 1/4]
-        # }
+        dynamic_sigma = { # linear interpolation of sigma based on command velocity, **Must start terrain curriculum first**
+            "min_lin_vel": 0.5, # min abs linear velocity to have default sigma
+            "max_lin_vel": 1.5, # max abs linear velocity to have max sigma
+            "min_ang_vel": 1.0, # min abs angular velocity to have default sigma
+            "max_ang_vel": 2.0, # max abs angular velocity to have max sigma
+            # wave, slope, rough_slope, stairs up, stairs down, obstacles, stepping_stones, gap, flat]
+            # "max_sigma": [1/3, 1/4, 1/4, 1/2.7, 1/2.7, 1/2, 1, 1, 1/4]
+            "max_sigma": [5/12, 1/4, 1/4, 1/2, 1/2, 3/4, 1, 1, 1/4]
+        }
         min_legs_distance = 0.1  # min distance between legs to not be considered stumbling
         class scales:
             # tracking_lin_vel = 1.0

@@ -90,7 +90,7 @@ class Terrain:
                                 length=self.width_per_env_pixels,
                                 vertical_scale=self.cfg.vertical_scale,
                                 horizontal_scale=self.cfg.horizontal_scale)
-        IS_HARD = True
+        IS_HARD = False
         if IS_HARD:
             # hard
             slope = 0.1 + difficulty * 0.52  # max: 29.6 degrees

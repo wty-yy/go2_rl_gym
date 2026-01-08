@@ -47,8 +47,8 @@ def play(args):
         else:
             model = runner.alg.model
         export_policy_as_jit(model, path)
-        export_policy_as_onnx(model, path)
-        export_policy_as_pkl(model, path)
+        # export_policy_as_onnx(model, path)
+        # export_policy_as_pkl(model, path)
         print('Exported policy as jit script / onnx to: ', path)
 
     for i in range(10*int(env.max_episode_length)):
