@@ -94,7 +94,7 @@ class GO2Cfg(LeggedRobotCfg):
         # terrain_proportions = [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
         # terrain_proportions = [0.3, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1]
         # terrain_proportions = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-        move_down_by_accumulated_xy_command = False # move down the terrain curriculum based on accumulated xy command distance instead of absolute distance
+        move_down_by_accumulated_xy_command = True # move down the terrain curriculum based on accumulated xy command distance instead of absolute distance
         
     class commands(LeggedRobotCfg.commands):
         curriculum = False
@@ -110,7 +110,7 @@ class GO2Cfg(LeggedRobotCfg):
         limit_vel_invert_when_continuous = True # invert the limit logic when using continuous sample limit velocity commands
         limit_vel = {"lin_vel_x": [-1, 1], "lin_vel_y": [-1, 1], "ang_vel_yaw": [-1, 0, 1]} # sample vel commands from min [-1] or zero [0] or max [1] range only
         stop_heading_at_limit = True # stop heading updates when vel is limited
-        dynamic_resample_commands = False # sample commands with low bounds
+        dynamic_resample_commands = True # sample commands with low bounds
         command_range_curriculum = []
         # command_range_curriculum = [{ # list for command range curriculums at specific training iterations
         #     'iter': 20000, # training iteration at which the command ranges are updated

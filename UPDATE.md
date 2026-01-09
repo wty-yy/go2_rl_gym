@@ -1,3 +1,8 @@
+# 20260109
+## v0.1.7-vanilla
+1. 加入两个配置legged_gym/envs/go2/go2_config_vanilla.py和legged_gym/envs/go2/go2_config_vanilla2.py
+    - vanilla: episode长度25, 指令采样步数5, 关闭haeding_command, 打开关闭move_down_by_accumulated_xy_command, dynamic_resample_commands
+    - vanilla2：episode长度20, 指令采样步数10, 打开haeding_command, 关闭move_down_by_accumulated_xy_command, dynamic_resample_commands, zero_command_curriculum, limit_vel_prob, command_range_curriculum, dynamic_sigma
 # 20260107
 ## v0.1.7
 Fix bug: 
