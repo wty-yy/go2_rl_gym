@@ -1,3 +1,7 @@
+# 20260112
+## v0.1.9
+1. 添加训练完成时, 等待RoboGauge全部评估完全后结束
+2. PPO训练步数对齐到150k, 并加入配置yaml自动存储功能
 # 20260109
 ## v0.1.8
 1. 加入两个配置legged_gym/envs/go2/go2_config_vanilla.py和legged_gym/envs/go2/go2_config_vanilla2.py

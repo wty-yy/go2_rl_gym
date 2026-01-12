@@ -238,7 +238,7 @@ class GO2CfgPPO(LeggedRobotCfgPPO):
     class runner(LeggedRobotCfgPPO.runner):
         run_name = ''
         experiment_name = 'go2_ppo'
-        max_iterations = 100000
+        max_iterations = 150000
         save_interval = 500
 
 class GO2CfgCTS(LeggedRobotCfgCTS):

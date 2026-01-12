@@ -393,6 +393,9 @@ class LeggedRobotCfgREMCTS(LeggedRobotCfgCTS):
         expert_num = 8 # number of experts in the student model
         student_encoder_hidden_dims = [512, 256, 128]
 
+    class algorithm(LeggedRobotCfgCTS.algorithm):
+        load_balance_coef = 0.01  # coefficient for load balance loss
+
     class runner(LeggedRobotCfgCTS.runner):
         policy_class_name = 'ActorCriticREMCTS'
         algorithm_class_name = 'REMCTS'
