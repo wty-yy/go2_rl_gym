@@ -253,7 +253,7 @@ class GO2CfgPPO(LeggedRobotCfgPPO):
     class runner(LeggedRobotCfgPPO.runner):
         run_name = ''
         experiment_name = 'go2_ppo'
-        max_iterations = 150000
+        max_iterations = 120000
         save_interval = 500
 
 class GO2CfgCTS(LeggedRobotCfgCTS):
@@ -261,7 +261,7 @@ class GO2CfgCTS(LeggedRobotCfgCTS):
         num_steps_per_env = 24
         run_name = ''
         experiment_name = 'go2_cts'
-        max_iterations = 150000
+        max_iterations = 120000
         save_interval = 500
     
     class policy(LeggedRobotCfgCTS.policy):
@@ -279,7 +279,7 @@ class GO2CfgMoECTS(LeggedRobotCfgMoECTS):
     class runner(LeggedRobotCfgMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_moe_cts'
-        max_iterations = 150000
+        max_iterations = 120000
         save_interval = 500
 
 class GO2CfgMCPCTS(LeggedRobotCfgMCPCTS):
@@ -290,7 +290,7 @@ class GO2CfgMCPCTS(LeggedRobotCfgMCPCTS):
     class runner(LeggedRobotCfgMCPCTS.runner):
         run_name = ''
         experiment_name = 'go2_mcp_cts'
-        max_iterations = 150000
+        max_iterations = 120000
         save_interval = 500
 
 class GO2CfgACMoECTS(LeggedRobotCfgACMoECTS):
@@ -300,7 +300,7 @@ class GO2CfgACMoECTS(LeggedRobotCfgACMoECTS):
     class runner(LeggedRobotCfgACMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_ac_moe_cts'
-        max_iterations = 150000
+        max_iterations = 120000
         save_interval = 500
 
 class GO2CfgDualMoECTS(LeggedRobotCfgDualMoECTS):
@@ -310,7 +310,7 @@ class GO2CfgDualMoECTS(LeggedRobotCfgDualMoECTS):
     class runner(LeggedRobotCfgDualMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_dual_moe_cts'
-        max_iterations = 150000
+        max_iterations = 120000
         save_interval = 500
 
 class GO2CfgREMCTS(LeggedRobotCfgREMCTS):
@@ -320,5 +320,5 @@ class GO2CfgREMCTS(LeggedRobotCfgREMCTS):
     class runner(LeggedRobotCfgREMCTS.runner):
         run_name = ''
         experiment_name = 'go2_rem_cts'
-        max_iterations = 150000
+        max_iterations = 120000
         save_interval = 500
