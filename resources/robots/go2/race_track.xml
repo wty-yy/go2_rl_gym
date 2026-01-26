@@ -13,7 +13,7 @@
     <texture type="skybox" builtin="flat" rgb1="0 0 0" rgb2="0 0 0" width="512" height="3072" />
     <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300" />
     <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2" />
-  <texture name="wood_tex" type="2d" file="./assets/wood.png" rgb1="0.6 0.4 0.2" width="512" height="512" /><material name="wood_mat" texture="wood_tex" specular="0.2" shininess="0.1" rgba="1 1 1 1" /><texture name="sponge_tex" type="2d" builtin="flat" rgb1="1.0 0.7 0.7" width="512" height="512" /><material name="mat_sponge" texture="sponge_tex" specular="0.1" shininess="0.1" rgba="1 0.7 0.7 1" /><hfield name="perlin_hfield" size="1.2 2.4 0.08 0.1" file="height_field.png" /></asset>
+  <texture name="wood_tex" type="2d" file="./assets/wood.png" rgb1="0.6 0.4 0.2" width="512" height="512" /><material name="wood_mat" texture="wood_tex" specular="0.2" shininess="0.1" rgba="1 1 1 1" /><texture name="sponge_tex" type="2d" builtin="flat" rgb1="0.90196 0.83922 0.56471" width="512" height="512" /><material name="mat_sponge" texture="sponge_tex" specular="0.1" shininess="0.1" rgba="1 0.7 0.7 1" /><hfield name="perlin_hfield" size="1.2 2.4 0.08 0.1" file="height_field.png" /></asset>
 
   <worldbody>
     <light pos="1 0 3.5" dir="0 0 -1" directional="true" />

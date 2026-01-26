@@ -27,6 +27,15 @@ def get_gravity_orientation(quaternion):
 
     return gravity_orientation
 
+def quat_rotate_inverse(q, v):
+    q = np.array(q, np.float32)
+    v = np.array(v, np.float32)
+    q_w = q[0]
+    q_vec = q[1:]
+    a = v * (2.0 * q_w ** 2 - 1.0)
+    b = np.cross(q_vec, v) * q_w * 2.0
+    c = q_vec * np.dot(q_vec, v) * 2.0
+    return a - b + c
 
 def pd_control(target_q, q, kp, target_dq, dq, kd):
     """Calculates torques from position commands"""
@@ -162,11 +171,17 @@ if __name__ == "__main__":
         # Close the viewer automatically after simulation_duration wall-seconds.
         start = time.time()
         while viewer.is_running() and time.time() - start < simulation_duration:
+            vel = d.qvel[:3]
+            ang_vel = d.qvel[3:6]
+            local_vel = quat_rotate_inverse(d.qpos[3:7], vel)
+            local_ang_vel = quat_rotate_inverse(d.qpos[3:7], ang_vel)
+            show_str = f"Speed: Vx={local_vel[0]:.2f}, Vy={local_vel[1]:.2f}, Wz={local_ang_vel[2]:.2f}, "
             step_start = time.time()
 
             if use_joystick and counter % control_decimation == 0:
                 cmd = get_xbox_command(joystick, config["max_cmd"])
-                print(f"Cmd: Vx={cmd[0]:.2f}, Vy={cmd[1]:.2f}, Wz={cmd[2]:.2f}", end='\r')
+                show_str += f"Cmd: Vx={cmd[0]:.2f}, Vy={cmd[1]:.2f}, Wz={cmd[2]:.2f}"
+                print(show_str, end='\r')
 
             tau = pd_control(target_dof_pos, d.qpos[7:], kps, np.zeros_like(kds), d.qvel[6:], kds)
             d.ctrl[:] = tau

@@ -6,8 +6,8 @@ import noise
 import os
 
 ROBOT = "go2"
-INPUT_SCENE_PATH = os.path.join(os.path.dirname(__file__), "scene.xml")
-OUTPUT_SCENE_PATH = os.path.join(os.path.dirname(__file__), "scene_terrain.xml")
+INPUT_SCENE_PATH = os.path.join(os.path.dirname(__file__), "flat.xml")
+OUTPUT_SCENE_PATH = os.path.join(os.path.dirname(__file__), "race_track_tmp.xml")
 PATH_DIR = Path(__file__).parent.absolute()
 # zyx euler angle to quaternion
 def euler_to_quat(roll, pitch, yaw):
@@ -114,7 +114,8 @@ class TerrainGenerator:
         tex.attrib["name"] = "sponge_tex"
         tex.attrib["type"] = "2d"
         tex.attrib["builtin"] = "flat"     # 使用内置平面纹理，不需要 file 路径
-        tex.attrib["rgb1"] = "1.0 0.7 0.7" # 设置颜色：粉色 (参考图片颜色)
+        # tex.attrib["rgb1"] = "1.0 0.7 0.7" # 设置颜色：粉色 (参考图片颜色)
+        tex.attrib["rgb1"] = "0.90196 0.83922 0.56471" # 设置颜色：黄色
         tex.attrib["width"] = "512"
         tex.attrib["height"] = "512"
         

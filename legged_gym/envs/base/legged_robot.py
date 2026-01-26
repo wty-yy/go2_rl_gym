@@ -1417,13 +1417,6 @@ class LeggedRobot(BaseTask):
         # Penalize joint poses far away from default pose
         return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
 
-    def _reward_hip_to_default(self):
-        hip_dof_names = ['FL_hip_joint', 'FR_hip_joint', 'RL_hip_joint', 'RR_hip_joint']
-        hip_dof_indices = [0, 3, 6, 9]
-        hip_pos = self.dof_pos[:, hip_dof_indices]
-        default_hip_pos = self.default_dof_pos[:, hip_dof_indices]
-        return torch.sum(torch.abs(hip_pos - default_hip_pos), dim=1)
-
     def _reward_upright(self):
         return (-1 - self.projected_gravity[:, 2]) / 2
     

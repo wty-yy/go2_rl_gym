@@ -243,7 +243,7 @@ if __name__ == "__main__":
                 
                 # 处理 MoE 和 绘图
                 if isinstance(result, tuple):
-                    action, weights = result  # moe
+                    action, (weights, latent) = result  # moe
                     action = action.detach().numpy().squeeze()[idx_model2mj]
                     weights = weights.detach().numpy().squeeze()
                     

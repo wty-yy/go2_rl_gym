@@ -191,32 +191,6 @@ class GO2Cfg(LeggedRobotCfg):
         # }
         min_legs_distance = 0.1  # min distance between legs to not be considered stumbling
         class scales:
-            # tracking_lin_vel = 1.0
-            # tracking_ang_vel = 0.2
-            # lin_vel_z = -10.0
-            # base_height = -50.0
-            # action_rate = -0.005
-            # similar_to_default = -0.1
-            # dof_power = -1e-3  # 能够明显抑制跳跃
-            # dof_acc = -3e-7
-
-            # tracking_lin_vel = 1.0
-            # tracking_ang_vel = 0.5
-            # lin_vel_z = -2.0
-            # ang_vel_xy = -0.05
-            # dof_acc = -2.5e-7
-            # dof_power = -1e-3  # 能够明显抑制跳跃
-            # # torques = -1e-4  # 无用会走着走着倒了
-            # correct_base_height = -10.0
-            # action_rate = -0.01
-            # action_smoothness = -0.01
-            # collision = -1.0
-            # dof_pos_limits = -2.0
-            # feet_regulation = -0.05
-            # hip_to_default = -0.1
-            # similar_to_default = -0.05
-
-            # CTS reward
             tracking_lin_vel = 1.0
             tracking_ang_vel = 0.5
             lin_vel_z = -2.0
@@ -230,11 +204,12 @@ class GO2Cfg(LeggedRobotCfg):
             collision = -1.0
             dof_pos_limits = -2.0
             feet_regulation = -0.05
-            # CTS奖励训出来双脚距离非常近, 真机效果很差, 但是sim2sim能上20cm楼梯, 尝试加入hip_to_default奖励或similar_to_default奖励
-            hip_to_default = -0.05  # 在训练到y=1.5时, 双脚会明显碰撞, 为避免该问题提升hip, 效果更差, 还是保持0.05 (y最大也只到0.1了)
-            # legs_distance = -1.5  # 奖励双脚距离, 避免CTS训练出来双脚距离过近, 尝试加入后robogauge flat验证效果变差, 删除
+            # CTS reward trains to have very close feet distance, real robot performance is poor, but sim2sim can climb 20cm stairs, try to add hip_to_default reward or similar_to_default reward
+            # training to y=1.5, font feet will collide noticeably, max y=1.0
+            hip_to_default = -0.05
+            # legs_distance = -1.5  # not good performance, avoid leg collision
             # similar_to_default = -0.01
-            # feet_contact_forces = -1.0  # 尝试加入但并没有起到任何效果, 删除
+            # feet_contact_forces = -1.0  # try to add but no effect, remove
 
         turn_over_roll_threshold = math.pi / 4 # threshold on roll to use turn over rewards
         class turn_over_scales:
@@ -253,7 +228,7 @@ class GO2CfgPPO(LeggedRobotCfgPPO):
     class runner(LeggedRobotCfgPPO.runner):
         run_name = ''
         experiment_name = 'go2_ppo'
-        max_iterations = 120000
+        max_iterations = 150000
         save_interval = 500
 
 class GO2CfgCTS(LeggedRobotCfgCTS):
@@ -261,7 +236,7 @@ class GO2CfgCTS(LeggedRobotCfgCTS):
         num_steps_per_env = 24
         run_name = ''
         experiment_name = 'go2_cts'
-        max_iterations = 120000
+        max_iterations = 150000
         save_interval = 500
     
     class policy(LeggedRobotCfgCTS.policy):
@@ -279,7 +254,7 @@ class GO2CfgMoECTS(LeggedRobotCfgMoECTS):
     class runner(LeggedRobotCfgMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_moe_cts'
-        max_iterations = 120000
+        max_iterations = 150000
         save_interval = 500
 
 class GO2CfgMCPCTS(LeggedRobotCfgMCPCTS):
@@ -290,7 +265,7 @@ class GO2CfgMCPCTS(LeggedRobotCfgMCPCTS):
     class runner(LeggedRobotCfgMCPCTS.runner):
         run_name = ''
         experiment_name = 'go2_mcp_cts'
-        max_iterations = 120000
+        max_iterations = 150000
         save_interval = 500
 
 class GO2CfgACMoECTS(LeggedRobotCfgACMoECTS):
@@ -300,7 +275,7 @@ class GO2CfgACMoECTS(LeggedRobotCfgACMoECTS):
     class runner(LeggedRobotCfgACMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_ac_moe_cts'
-        max_iterations = 120000
+        max_iterations = 150000
         save_interval = 500
 
 class GO2CfgDualMoECTS(LeggedRobotCfgDualMoECTS):
@@ -310,7 +285,7 @@ class GO2CfgDualMoECTS(LeggedRobotCfgDualMoECTS):
     class runner(LeggedRobotCfgDualMoECTS.runner):
         run_name = ''
         experiment_name = 'go2_dual_moe_cts'
-        max_iterations = 120000
+        max_iterations = 150000
         save_interval = 500
 
 class GO2CfgREMCTS(LeggedRobotCfgREMCTS):
@@ -320,5 +295,5 @@ class GO2CfgREMCTS(LeggedRobotCfgREMCTS):
     class runner(LeggedRobotCfgREMCTS.runner):
         run_name = ''
         experiment_name = 'go2_rem_cts'
-        max_iterations = 120000
+        max_iterations = 150000
         save_interval = 500
