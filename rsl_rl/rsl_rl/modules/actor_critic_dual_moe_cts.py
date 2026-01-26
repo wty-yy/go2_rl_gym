@@ -27,7 +27,7 @@ class ActorCriticDualMoECTS(nn.Module):
                         actor_hidden_dims=[512, 256, 128],
                         critic_hidden_dims=[512, 256, 128],
                         teacher_encoder_hidden_dims=[512, 256],
-                        student_encoder_hidden_dims=[512, 256, 128],  # last dim is expert hidden dim
+                        student_encoder_hidden_dims=[512, 256, 256],  # last dim is expert hidden dim
                         expert_num=8,
                         activation='elu',
                         init_noise_std=1.0,

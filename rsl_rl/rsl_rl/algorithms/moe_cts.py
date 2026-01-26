@@ -202,7 +202,7 @@ class MoECTS(CTS):
                 hid_states_batch, masks_batch
             ) = sample
             # Student encoder update
-            student_latent, gating_weights = self.model.get_student_latent_and_weights(history_batch[teacher_samples:])
+            student_latent, gating_weights = self.model.student_moe_encoder(history_batch[teacher_samples:])
             with torch.no_grad():
                 teacher_latent = self.model.teacher_encoder(privileged_obs_batch[teacher_samples:])
             latent_loss = (teacher_latent - student_latent).pow(2).mean()

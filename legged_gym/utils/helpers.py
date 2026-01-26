@@ -118,6 +118,10 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
             cfg_train.runner.load_run = args.load_run
         if args.checkpoint is not None:
             cfg_train.runner.checkpoint = args.checkpoint
+        if args.robogauge is not None:
+            cfg_train.robogauge.enabled = args.robogauge
+        if args.robogauge_port is not None:
+            cfg_train.robogauge.port = args.robogauge_port
 
     return env_cfg, cfg_train
 
@@ -136,6 +140,9 @@ def get_args():
         {"name": "--num_envs", "type": int, "help": "Number of environments to create. Overrides config file if provided."},
         {"name": "--seed", "type": int, "help": "Random seed. Overrides config file if provided."},
         {"name": "--max_iterations", "type": int, "help": "Maximum number of training iterations. Overrides config file if provided."},
+
+        {"name": "--robogauge", "action": "store_true", "default": False, "help": "Enable robogauge evaluation interface."},
+        {"name": "--robogauge_port", "type": int, "default": 9973, "help": "Port for robogauge evaluation interface."},
     ]
     # parse arguments
     args = gymutil.parse_arguments(

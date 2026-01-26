@@ -1,4 +1,5 @@
-policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/go2/go2_cts_150k.pt"
+policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/go2/go2_moe_cts_137000_0.6365.pt"
+# policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/go2/go2_cts_150k.pt"
 
 # xml_path: "{LEGGED_GYM_ROOT_DIR}/resources/robots/go2/flat.xml"
 # xml_path: "{LEGGED_GYM_ROOT_DIR}/resources/robots/go2/race_track.xml"  # change go2 init pos to pos="-5 2 0.445" in resources/robots/go2/go2.xml

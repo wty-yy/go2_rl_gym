@@ -2,7 +2,7 @@ from setuptools import find_packages
 from distutils.core import setup
 
 setup(name='go2_rl_gym',
-      version='1.0.1',
+      version='1.0.2',
       author='Wu Tianyang',
       license="MIT",
       packages=find_packages(),

@@ -30,8 +30,8 @@
 
 from .ppo import PPO
 from .cts import CTS
-from .moe_cts import MoECTS
+from .moe_ng_cts import MoENGCTS
 from .mcp_cts import MCPCTS
 from .ac_moe_cts import ACMoECTS
 from .dual_moe_cts import DualMoECTS
-from .rem_cts import REMCTS
+from .moe_cts import MoECTS

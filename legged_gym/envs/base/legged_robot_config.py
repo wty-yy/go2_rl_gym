@@ -302,6 +302,10 @@ class LeggedRobotCfgPPO(BaseConfig):
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
 
+    class robogauge:
+        enabled = False
+        port = 9973
+
 class LeggedRobotCfgCTS(BaseConfig):
     seed = 0
     runner_class_name = "OnPolicyRunnerCTS"
@@ -350,7 +354,11 @@ class LeggedRobotCfgCTS(BaseConfig):
         checkpoint = -1 # -1 = last saved model
         resume_path = None # updated from load_run and chkpt
 
-class LeggedRobotCfgMoECTS(LeggedRobotCfgCTS):
+    class robogauge:
+        enabled = False
+        port = 9973
+
+class LeggedRobotCfgMoENGCTS(LeggedRobotCfgCTS):
     class policy(LeggedRobotCfgCTS.policy):
         obs_no_goal_mask = None # mask for observation without goal inputs
         student_expert_num = 8 # number of experts in the student model
@@ -359,8 +367,8 @@ class LeggedRobotCfgMoECTS(LeggedRobotCfgCTS):
         load_balance_coef = 0.01  # coefficient for load balance loss
 
     class runner(LeggedRobotCfgCTS.runner):
-        policy_class_name = 'ActorCriticMoECTS'
-        algorithm_class_name = 'MoECTS'
+        policy_class_name = 'ActorCriticMoENGCTS'
+        algorithm_class_name = 'MoENGCTS'
 
 class LeggedRobotCfgMCPCTS(LeggedRobotCfgCTS):
     class policy(LeggedRobotCfgCTS.policy):
@@ -382,20 +390,20 @@ class LeggedRobotCfgACMoECTS(LeggedRobotCfgCTS):
 class LeggedRobotCfgDualMoECTS(LeggedRobotCfgCTS):
     class policy(LeggedRobotCfgCTS.policy):
         expert_num = 8 # number of experts in the student model
-        student_encoder_hidden_dims = [512, 256, 128]
+        student_encoder_hidden_dims = [512, 256, 256]
 
     class runner(LeggedRobotCfgCTS.runner):
         policy_class_name = 'ActorCriticDualMoECTS'
         algorithm_class_name = 'DualMoECTS'
 
-class LeggedRobotCfgREMCTS(LeggedRobotCfgCTS):
+class LeggedRobotCfgMoECTS(LeggedRobotCfgCTS):
     class policy(LeggedRobotCfgCTS.policy):
         expert_num = 8 # number of experts in the student model
-        student_encoder_hidden_dims = [512, 256, 128]
+        student_encoder_hidden_dims = [512, 256, 256]
 
     class algorithm(LeggedRobotCfgCTS.algorithm):
         load_balance_coef = 0.01  # coefficient for load balance loss
 
     class runner(LeggedRobotCfgCTS.runner):
-        policy_class_name = 'ActorCriticREMCTS'
-        algorithm_class_name = 'REMCTS'
+        policy_class_name = 'ActorCriticMoECTS'
+        algorithm_class_name = 'MoECTS'

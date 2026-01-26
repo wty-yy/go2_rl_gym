@@ -115,7 +115,7 @@ class MoE(nn.Module):
         
         # Gating network
         self.gating_network = nn.Sequential(
-            MLP([input_dim, *hidden_dims, expert_num], activation),
+            MLP([input_dim, *hidden_dims[:-1], expert_num], activation),
             nn.Softmax(dim=-1)
         )
 

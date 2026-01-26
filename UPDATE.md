@@ -1,3 +1,9 @@
+# 20260126
+## v1.0.2-rc1
+1. 修改高速移动的训练文件到最终版，删除配置中无用注释
+2. 将`rem_cts`重命名为`moe_cts`，原`moe_cts`重命名为`moe_no_goal_cts`
+3. 并发现之前的rem实现中，expert的共享权重网络只有128而之前是256，修改和moe参数量完全一致
+4. 加入`--robogauge`选择开启robogauge评测的命令行参数，默认关闭，以及`--robogauge_port`选择端口号，默认9973
 # 20260117
 ## v1.0.1
 1. 加入日志数据读取脚本`logs_merge.py`，压缩日志`logs_compress.py`工具

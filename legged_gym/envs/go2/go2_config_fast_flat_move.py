@@ -9,7 +9,7 @@
 Change command_range_curriculum, init command range
 '''
 import math
-from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobotCfgPPO, LeggedRobotCfgCTS, LeggedRobotCfgMoECTS, LeggedRobotCfgMoECTS, LeggedRobotCfgMCPCTS, LeggedRobotCfgACMoECTS, LeggedRobotCfgDualMoECTS, LeggedRobotCfgREMCTS
+from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobotCfgPPO, LeggedRobotCfgCTS, LeggedRobotCfgMoENGCTS, LeggedRobotCfgMoENGCTS, LeggedRobotCfgMCPCTS, LeggedRobotCfgACMoECTS, LeggedRobotCfgDualMoECTS, LeggedRobotCfgMoECTS
 
 class GO2Cfg(LeggedRobotCfg):
     class init_state(LeggedRobotCfg.init_state):
@@ -259,17 +259,17 @@ class GO2CfgCTS(LeggedRobotCfgCTS):
         latent_dim = 32
         norm_type = 'l2norm'
 
-class GO2CfgMoECTS(LeggedRobotCfgMoECTS):
-    class policy(LeggedRobotCfgMoECTS.policy):
+class GO2CfgMoENGCTS(LeggedRobotCfgMoENGCTS):
+    class policy(LeggedRobotCfgMoENGCTS.policy):
         obs_no_goal_mask = [True] * 6 + [False] * 3 + [True] * 36  # mask for obs without command info
         student_expert_num = 8 # number of experts in the student model
     
-    class algorithm(LeggedRobotCfgMoECTS.algorithm):
+    class algorithm(LeggedRobotCfgMoENGCTS.algorithm):
         load_balance_coef = 0.01
 
-    class runner(LeggedRobotCfgMoECTS.runner):
+    class runner(LeggedRobotCfgMoENGCTS.runner):
         run_name = ''
-        experiment_name = 'go2_moe_cts'
+        experiment_name = 'go2_moe_no_goal_cts'
         max_iterations = 150000
         save_interval = 500
 
@@ -304,12 +304,12 @@ class GO2CfgDualMoECTS(LeggedRobotCfgDualMoECTS):
         max_iterations = 150000
         save_interval = 500
 
-class GO2CfgREMCTS(LeggedRobotCfgREMCTS):
-    class policy(LeggedRobotCfgREMCTS.policy):
+class GO2CfgMoECTS(LeggedRobotCfgMoECTS):
+    class policy(LeggedRobotCfgMoECTS.policy):
         expert_num = 8  # number of experts in the student model
     
-    class runner(LeggedRobotCfgREMCTS.runner):
+    class runner(LeggedRobotCfgMoECTS.runner):
         run_name = ''
-        experiment_name = 'go2_rem_cts'
+        experiment_name = 'go2_moe_cts'
         max_iterations = 150000
         save_interval = 500

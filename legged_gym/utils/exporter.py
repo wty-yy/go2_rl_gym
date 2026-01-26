@@ -81,9 +81,9 @@ class _TorchPolicyExporter(torch.nn.Module):
                 self.obs_no_goal_mask = copy.deepcopy(policy.obs_no_goal_mask).cpu()
             self.history_length = policy.history.shape[1]
             self.history = torch.zeros([1, policy.history.shape[1], policy.history.shape[2]], device='cpu')
-            self.forward = self.forward_moe_cts
+            self.forward = self.forward_moe_no_goal_cts
             if not hasattr(policy, "obs_no_goal_mask"):
-                self.forward = self.forward_rem_cts
+                self.forward = self.forward_moe_cts
         if hasattr(policy, "actor_mcp"):
             self.actor = copy.deepcopy(policy.actor_mcp)
             self.obs_no_goal_mask = copy.deepcopy(policy.obs_no_goal_mask).cpu()
@@ -134,7 +134,7 @@ class _TorchPolicyExporter(torch.nn.Module):
         x = torch.cat([latent, x], dim=1)
         return self.actor(x), (None, latent)
     
-    def forward_moe_cts(self, x):  # x is single observations
+    def forward_moe_no_goal_cts(self, x):  # x is single observations
         x = self.normalizer(x)
         self.history = torch.cat([self.history[:, 1:], x.unsqueeze(1)], dim=1)
         history_no_goal = self.history.reshape(1, self.history_length, -1)[:, :, self.obs_no_goal_mask].reshape(1, -1)
@@ -142,7 +142,7 @@ class _TorchPolicyExporter(torch.nn.Module):
         x = torch.cat([latent, x], dim=1)
         return self.actor(x), (weights, latent)
 
-    def forward_rem_cts(self, x):  # x is single observations
+    def forward_moe_cts(self, x):  # x is single observations
         x = self.normalizer(x)
         self.history = torch.cat([self.history[:, 1:], x.unsqueeze(1)], dim=1)
         latent, weights = self.student_moe_encoder(self.history.flatten(1))
@@ -211,12 +211,12 @@ class _OnnxPolicyExporter(torch.nn.Module):
         elif hasattr(policy, "student_moe_encoder"):
             self.student_moe_encoder = copy.deepcopy(policy.student_moe_encoder)
             self.history_length = policy.history.shape[1]
-            self.forward = self.forward_moe_cts
+            self.forward = self.forward_moe_no_goal_cts
             self.input_dim = self.history_length * policy.history.shape[2]
             if hasattr(policy, "obs_no_goal_mask"):
                 self.obs_no_goal_mask = copy.deepcopy(policy.obs_no_goal_mask).cpu()
             else:
-                self.forward = self.forward_rem_cts
+                self.forward = self.forward_moe_cts
         
         else:  # PPO
             self.forward = self.forward_ppo
@@ -277,7 +277,7 @@ class _OnnxPolicyExporter(torch.nn.Module):
         
         return self.actor(x)
 
-    def forward_moe_cts(self, x):
+    def forward_moe_no_goal_cts(self, x):
         x = self.normalizer(x)
         history, obs_dim = self.flatten_obs(x)
 
@@ -290,7 +290,7 @@ class _OnnxPolicyExporter(torch.nn.Module):
 
         return self.actor(x), weights, latent
 
-    def forward_rem_cts(self, x):
+    def forward_moe_cts(self, x):
         x = self.normalizer(x)
         history, obs_dim = self.flatten_obs(x)
 
@@ -319,7 +319,7 @@ class _OnnxPolicyExporter(torch.nn.Module):
         obs = torch.zeros(1, self.input_dim)
         
         output_names = ["actions"]
-        if self.forward == self.forward_moe_cts:
+        if self.forward == self.forward_moe_no_goal_cts:
             output_names.append("weights")
             output_names.append("latent")
         if self.forward == self.forward_mcp_cts:

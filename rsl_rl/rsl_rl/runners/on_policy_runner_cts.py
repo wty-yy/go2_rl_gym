@@ -36,8 +36,8 @@ import statistics
 from torch.utils.tensorboard import SummaryWriter
 import torch
 
-from rsl_rl.algorithms import CTS, MoECTS, MCPCTS, ACMoECTS, DualMoECTS, REMCTS
-from rsl_rl.modules import ActorCriticCTS, ActorCriticMoECTS, ActorCriticMCPCTS, ActorCriticACMoECTS, ActorCriticDualMoECTS, ActorCriticREMCTS
+from rsl_rl.algorithms import CTS, MoENGCTS, MCPCTS, ACMoECTS, DualMoECTS, MoECTS
+from rsl_rl.modules import ActorCriticCTS, ActorCriticMoENGCTS, ActorCriticMCPCTS, ActorCriticACMoECTS, ActorCriticDualMoECTS, ActorCriticMoECTS
 from rsl_rl.env import VecEnv
 
 import yaml
@@ -79,7 +79,7 @@ class OnPolicyRunnerCTS:
             num_critic_obs = self.env.num_obs
         history_length = train_cfg["history_length"]
         actor_critic_class = eval(self.cfg["policy_class_name"])
-        model: Union[ActorCriticCTS, ActorCriticMoECTS, ActorCriticMCPCTS, ActorCriticACMoECTS, ActorCriticDualMoECTS, ActorCriticREMCTS] = actor_critic_class(
+        model: Union[ActorCriticCTS, ActorCriticMoENGCTS, ActorCriticMCPCTS, ActorCriticACMoECTS, ActorCriticDualMoECTS, ActorCriticMoECTS] = actor_critic_class(
             self.env.num_obs,
             num_critic_obs,
             self.env.num_actions,
@@ -87,7 +87,7 @@ class OnPolicyRunnerCTS:
             history_length,
             **self.policy_cfg).to(self.device)
         alg_class = eval(self.cfg["algorithm_class_name"])
-        self.alg: Union[CTS, MoECTS, MCPCTS, ACMoECTS, DualMoECTS, REMCTS] = alg_class(model, self.env.num_envs, history_length, device=self.device, **self.alg_cfg)
+        self.alg: Union[CTS, MoENGCTS, MCPCTS, ACMoECTS, DualMoECTS, MoECTS] = alg_class(model, self.env.num_envs, history_length, device=self.device, **self.alg_cfg)
         self.num_steps_per_env = self.cfg["num_steps_per_env"]
         self.save_interval = self.cfg["save_interval"]
 
@@ -112,9 +112,12 @@ class OnPolicyRunnerCTS:
         
         # robogauge client
         try:
+            if not train_cfg['robogauge']['enabled']:
+                raise ImportError("config disabled")
             from robogauge.scripts.client import RoboGaugeClient
-            self.robogauge_client = RoboGaugeClient("http://127.0.0.1:9973")  # Change PORT to your server port if needed, default is 9973
-        except:
+            self.robogauge_client = RoboGaugeClient(f"http://127.0.0.1:{train_cfg['robogauge']['port']}")
+        except Exception as e:
+            print(f"[INFO] RoboGauge client could not be initialized: {e}, disabling RoboGauge interface.")
             self.robogauge_client = None
     
     def learn(self, num_learning_iterations, init_at_random_ep_len=False):
@@ -183,7 +186,7 @@ class OnPolicyRunnerCTS:
             
             if self.cfg["algorithm_class_name"] in ["CTS", "MCPCTS"]:
                 mean_value_loss, mean_surrogate_loss, mean_entropy_loss, mean_latent_loss = self.alg.update()
-            elif self.cfg["algorithm_class_name"] in ["MoECTS", "ACMoECTS", "REMCTS"]:
+            elif self.cfg["algorithm_class_name"] in ["MoECTS", "MoENGCTS", "ACMoECTS"]:
                 mean_value_loss, mean_surrogate_loss, mean_entropy_loss, mean_latent_loss, mean_load_balance_loss = self.alg.update()
             elif self.cfg["algorithm_class_name"] == "DualMoECTS":
                 mean_value_loss, mean_surrogate_loss, mean_entropy_loss, mean_latent_loss, mean_load_balance_loss, mean_actor_load_balance_loss = self.alg.update()
