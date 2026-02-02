@@ -100,7 +100,7 @@ python deploy/deploy_mujoco/deploy_go2.py
 
 | 平地 | 台阶 | 赛道 |
 |--- | --- | --- |
-| <img src="https://raw.githubusercontent.com/robogauge/picture-bed/refs/heads/main/go2_rl_gym/mujoco_eval_flat.gif" width="200"/> | <img src="https://raw.githubusercontent.com/robogauge/picture-bed/refs/heads/main/go2_rl_gym/mujoco_eval.gif" width="200"/> | <img src="https://raw.githubusercontent.com/robogauge/picture-bed/refs/heads/main/go2_rl_gym/mujoco_eval_track.gif" width="200"/> |
+| <img src="https://raw.githubusercontent.com/robogauge/picture-bed/refs/heads/main/go2_rl_gym/mujoco_eval_flat.gif" width="250"/> | <img src="https://raw.githubusercontent.com/robogauge/picture-bed/refs/heads/main/go2_rl_gym/mujoco_eval.gif" width="250"/> | <img src="https://raw.githubusercontent.com/robogauge/picture-bed/refs/heads/main/go2_rl_gym/mujoco_eval_track.gif" width="250"/> |
 
 ---
 
