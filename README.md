@@ -164,6 +164,18 @@ Contributors:
 
 ---
 
+## 📄  Citation
+If you find our work helpful, please cite:
+```bibtex
+@article{wu2026robogauge,
+      title={Toward Reliable Sim-to-Real Predictability for MoE-based Robust Quadrupedal Locomotion}, 
+      author={Tianyang Wu and Hanwei Guo and Yuhang Wang and Junshu Yang and Xinyang Sui and Jiayi Xie and Xingyu Chen and Zeyang Liu and Xuguang Lan},
+      year={2026},
+      journal={arXiv preprint arXiv:2602.00678},
+      url={https://arxiv.org/abs/2602.00678}, 
+}
+```
+
 ## 🔖  License
 
 New contributions follow the [MIT License](LICENSE); the original unitree_rl_gym remains under the [BSD 3-Clause License](LICENSE).

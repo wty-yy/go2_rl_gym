@@ -162,6 +162,18 @@ python deploy_real_go2.py eth0
 
 ---
 
+## 📄  引用
+如果觉得我们的工作有帮助，请引用：
+```bibtex
+@article{wu2026robogauge,
+      title={Toward Reliable Sim-to-Real Predictability for MoE-based Robust Quadrupedal Locomotion}, 
+      author={Tianyang Wu and Hanwei Guo and Yuhang Wang and Junshu Yang and Xinyang Sui and Jiayi Xie and Xingyu Chen and Zeyang Liu and Xuguang Lan},
+      year={2026},
+      journal={arXiv preprint arXiv:2602.00678},
+      url={https://arxiv.org/abs/2602.00678}, 
+}
+```
+
 ## 🔖  许可证
 
 新增内容根据 [MIT License](./LICENSE) 授权，原仓库unitree_rl_gym根据 [BSD 3-Clause License](./LICENSE) 授权。
