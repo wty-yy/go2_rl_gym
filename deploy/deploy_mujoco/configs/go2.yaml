@@ -1,4 +1,4 @@
-policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/go2/go2_moe_cts_137000_0.6365.pt"
+policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/go2/go2_moe_cts_137k_0.6739.pt"
 # policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/go2/go2_cts_150k.pt"
 
 # xml_path: "{LEGGED_GYM_ROOT_DIR}/resources/robots/go2/flat.xml"
